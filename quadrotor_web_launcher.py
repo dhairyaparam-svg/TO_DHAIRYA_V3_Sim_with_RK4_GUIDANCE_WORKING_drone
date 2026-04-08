@@ -621,11 +621,7 @@ with tab4:
                 import traceback
                 st.code(traceback.format_exc())
 
-            st.markdown("""
-                ---
-                The Vehicle Arrives 2 meters above Z coodrinate of the target to ensure Safe Landing 
-                ---
-                """)
+            st.caption("The Vehicle Arrives 2 Meters above Z Coordinate of the target to ensure Safe Landing")
 
 # ============================================================================
 # TAB 5: Results
