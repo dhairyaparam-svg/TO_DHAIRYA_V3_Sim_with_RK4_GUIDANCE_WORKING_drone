@@ -126,6 +126,14 @@ if 'simulation_results' not in st.session_state:
 
 st.sidebar.markdown("""
 <div style="text-align: center; margin-top: 3rem;">
+    <p style="font-size: 0.85rem; color: #888;">
+        Developed in<br>
+        <b style="color: #555;">This simulation is performed on a 10 inch quad with 4S 5200MAh Powerpack</b><br>
+        For Custom set of parameters refer to the Repository.
+    </p>
+</div>
+
+<div style="text-align: center; margin-top: 3rem;">
     <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9b/Indian_Institute_of_Technology_Gandhinagar_Logo.svg/1200px-Indian_Institute_of_Technology_Gandhinagar_Logo.svg.png" width="100" style="margin-bottom: 10px;">
     <p style="font-size: 0.85rem; color: #888;">
         Developed in<br>
@@ -147,7 +155,7 @@ st.divider()
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📍 Scenario", 
     "⚙️ Parameters", 
-    "📐 Ee Function",
+    "📐 Sliding Mode Variable Function",
     "🎮 Run Simulation",
     "📊 Results"
 ])
@@ -357,7 +365,7 @@ with tab2:
 # ============================================================================
 
 with tab3:
-    st.header("📐 Distance-Based Ee Function")
+    st.header("📐 Distance-Based Sliding Mode Variable Function")
     st.write("Select how distance affects the sliding mode reaching law:")
     st.divider()
     
