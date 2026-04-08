@@ -616,15 +616,16 @@ with tab4:
                     plt.tight_layout()
                     st.pyplot(fig)
 
+            except Exception as e:
+                st.error(f"❌ Simulation failed: {str(e)}")
+                import traceback
+                st.code(traceback.format_exc())
+
             st.markdown("""
                 ---
                 The Vehicle Arrives 2 meters above Z coodrinate of the target to ensure Safe Landing 
                 ---
                 """)
-            except Exception as e:
-                st.error(f"❌ Simulation failed: {str(e)}")
-                import traceback
-                st.code(traceback.format_exc())
 
 # ============================================================================
 # TAB 5: Results
