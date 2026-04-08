@@ -621,7 +621,7 @@ with tab4:
                 import traceback
                 st.code(traceback.format_exc())
 
-            st.caption("The Vehicle Arrives 2 Meters above Z Coordinate of the target to ensure Safe Landing")
+            st.caption("The Vehicle Arrives 3 Meters above Z Coordinate of the target to ensure Safe Landing")
 
 # ============================================================================
 # TAB 5: Results
@@ -796,8 +796,8 @@ with tab5:
 st.divider()
 st.markdown("""
 ---
-**SMC-IO Asteroid Landing Guidance System**
-*Based on research by V.S. Shincy & Dr. Satadal Ghosh (2023)*
+**SMC-IO based Multirotor Guidance System**
+*Based on research by D. Dosi & Venketesh (2026)*
 
 Built with: Passion | Creativity | Love | 
 
