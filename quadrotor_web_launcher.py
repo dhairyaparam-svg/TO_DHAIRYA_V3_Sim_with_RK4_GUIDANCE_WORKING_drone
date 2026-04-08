@@ -787,3 +787,17 @@ with tab5:
                 template="plotly_white"
             )
             st.plotly_chart(fig_dens, use_container_width=True)
+# ============================================================================
+# Footer
+# ============================================================================
+
+st.divider()
+st.markdown("""
+---
+**SMC-IO Asteroid Landing Guidance System**
+*Based on research by V.S. Shincy & Dr. Satadal Ghosh (2023)*
+
+Built with: Passion | Creativity | Love | 
+
+[🚀 SMC-IO Asteroid Landing Guidance](https://slidingmodeguidence.streamlit.app/) | [📋 Documentation](https://arc.aiaa.org/doi/10.2514/1.A35412) | [🐛 Report Issues](dhairya.param@iitgn.ac.in)
+""")
