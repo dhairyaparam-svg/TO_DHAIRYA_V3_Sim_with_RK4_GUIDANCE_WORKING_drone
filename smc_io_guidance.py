@@ -213,7 +213,7 @@ def compute_distance_based_ee(r_norm, pos0_norm, Ee0, ee_function="quadratic_cub
         return 0
     
     # Normalized distance ratio
-    r_ratio = r_norm / pos0_norm
+    r_ratio =  pos0_norm / r_norm 
     
     if ee_function == "linear":
         return Ee0 * r_ratio
