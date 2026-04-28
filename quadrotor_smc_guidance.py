@@ -191,7 +191,7 @@ def compute_distance_based_ee(r_norm, pos0_norm, Ee0, ee_function="quadratic_cub
     if r_norm < rf_threshold:
         return 0.0
 
-    r_ratio = r_norm / pos0_norm if pos0_norm > 1e-12 else 0.0
+    r_ratio =  pos0_norm / r_norm if r_norm > 1e-12 else 0.0
 
     if ee_function == "linear":
         return Ee0 * r_ratio

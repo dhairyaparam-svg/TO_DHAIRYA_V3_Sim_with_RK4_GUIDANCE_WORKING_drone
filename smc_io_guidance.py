@@ -181,7 +181,7 @@ def heading_error_coefficients(r, v, rfd, g):
     return alpha1, alpha2, alpha3, alpha4, Se
 
 
-def compute_distance_based_ee(r_norm, pos0_norm, Ee0, ee_function="quadratic_cubic", rf_threshold=1050.0):
+def compute_distance_based_ee(r_norm, pos0_norm, Ee0, ee_function="quadratic_cubic", rf_threshold=50.0):
     """
     Compute distance-dependent sliding mode coefficient Ee using selected function.
     
@@ -210,7 +210,7 @@ def compute_distance_based_ee(r_norm, pos0_norm, Ee0, ee_function="quadratic_cub
         Distance-dependent reaching law coefficient Ee
     """
     if r_norm < rf_threshold:
-        return 0.0
+        return 0
     
     # Normalized distance ratio
     r_ratio = r_norm / pos0_norm
