@@ -126,7 +126,15 @@ if 'simulation_results' not in st.session_state:
 
 st.sidebar.markdown("""
 <div style="text-align: center; margin-top: 3rem;">
-    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9b/Indian_Institute_of_Technology_Gandhinagar_Logo.svg/1200px-Indian_Institute_of_Technology_Gandhinagar_Logo.svg.png" width="100" style="margin-bottom: 10px;">
+    <p style="font-size: 0.85rem; color: #888;">
+        <br>
+        <b style="color: #555;">This simulation is performed on a 10 inch quad with 4S 5200MAh Powerpack</b><br>
+        For Custom set of parameters kindly refer to the Repository.
+    </p>
+</div>
+
+<div style="text-align: center; margin-top: 3rem;">
+    <img src="https://iitgn.ac.in/assets/img/logo.png" width="100" style="margin-bottom: 10px;">
     <p style="font-size: 0.85rem; color: #888;">
         Developed in<br>
         <b style="color: #555;">Center of Research Commercialization</b><br>
@@ -147,7 +155,7 @@ st.divider()
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📍 Scenario", 
     "⚙️ Parameters", 
-    "📐 Ee Function",
+    "📐 Sliding Mode Variable Function",
     "🎮 Run Simulation",
     "📊 Results"
 ])
@@ -357,7 +365,7 @@ with tab2:
 # ============================================================================
 
 with tab3:
-    st.header("📐 Distance-Based Ee Function")
+    st.header("📐 Distance-Based Sliding Mode Variable Function")
     st.write("Select how distance affects the sliding mode reaching law:")
     st.divider()
     
@@ -607,11 +615,13 @@ with tab4:
                     
                     plt.tight_layout()
                     st.pyplot(fig)
-                
+
             except Exception as e:
                 st.error(f"❌ Simulation failed: {str(e)}")
                 import traceback
                 st.code(traceback.format_exc())
+
+            st.caption("The Vehicle Arrives 3 Meters above Z Coordinate of the target to ensure Safe Landing")
 
 # ============================================================================
 # TAB 5: Results
@@ -779,3 +789,17 @@ with tab5:
                 template="plotly_white"
             )
             st.plotly_chart(fig_dens, use_container_width=True)
+# ============================================================================
+# Footer
+# ============================================================================
+
+st.divider()
+st.markdown("""
+---
+**SMC-IO based Multirotor Guidance System**
+*Based on research by D. Dosi & Venketesh (2026)*
+
+Built with: Passion | Creativity | Love | 
+
+[🚀 SMC-IO Asteroid Landing Guidance](https://slidingmodeguidence.streamlit.app/) | [📋 Documentation](https://arc.aiaa.org/doi/10.2514/1.A35412) | [🐛 Report Issues](dhairya.param@iitgn.ac.in)
+""")
