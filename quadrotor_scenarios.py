@@ -75,7 +75,7 @@ DEFAULT_PARAMS = {
 # Flight Scenarios
 # =============================================================================
 
-FLIGHT_SCENARIOS_og = {
+FLIGHT_SCENARIOS = {
     # FS1: Simple point-to-point, no wind, no obstacles
     1: {
         "name": "FS1 — Point-to-Point Calm",
@@ -150,7 +150,7 @@ FLIGHT_SCENARIOS_og = {
     },
 }
 
-FLIGHT_SCENARIOS = {
+FLIGHT_SCENARIOS_ap = {
     
     
 
