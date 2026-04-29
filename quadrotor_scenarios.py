@@ -125,7 +125,7 @@ FLIGHT_SCENARIOS = {
         "rfd":  np.array([150.0, 0.0, 50.0]),
         "tf":   90.0,
         "obstacles": [
-            make_obstacle([ 40.0,  7.0, 50.0], 15.0),   # right side  → pushes drone left
+            make_obstacle([ 20.0,  7.0, 50.0], 15.0),   # right side  → pushes drone left
             make_obstacle([ 80.0, -7.0, 50.0], 5.0),   # left  side  → pushes drone right
             make_obstacle([120.0,  7.0, 50.0], 8.0),   # right side  → pushes drone left
         ],
