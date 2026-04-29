@@ -130,7 +130,7 @@ FLIGHT_SCENARIOS = {
             make_obstacle([120.0,  7.0, 50.0], 8.0),   # right side  → pushes drone left
         ],
         "obstacle_margin": 0.5,
-        "obstacle_k_rep":  30.0,
+        "obstacle_k_rep":  1.0,
     },
 
     # FS4: Climb to 200 m — ISA density drops ~2.5 % — tractable for SMC

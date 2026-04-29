@@ -153,7 +153,7 @@ def make_obstacle(centre, radius):
     return {"centre": np.array(centre, dtype=float), "radius": float(radius)}
 
 
-def obstacle_penalty(pos, obstacles, margin=0.5, k_rep=5):
+def obstacle_penalty(pos, obstacles, margin=0.5, k_rep=1):
     """
     Repulsive acceleration that pushes the vehicle away from obstacles.
 
