@@ -69,8 +69,8 @@ def obstacle_acceleration(pos, params):
         return np.zeros(3)
     return obstacle_penalty(
         pos, params["obstacles"],
-        margin=params.get("obstacle_margin", 5.0),
-        k_rep=params.get("obstacle_k_rep", 50.0),
+        margin=params.get("obstacle_margin", 0.5),
+        k_rep=params.get("obstacle_k_rep", 5),
     )
 
 
@@ -182,16 +182,26 @@ def heading_error_coefficients(r, v, rfd, g):
 
 
 def compute_distance_based_ee(r_norm, pos0_norm, Ee0, ee_function="quadratic_cubic",
-                              rf_threshold=2.0):
+                              rf_threshold=2.0, invert_ratio=False):
     """
     Distance-dependent sliding-mode reaching-law coefficient Ee.
     Same function set as the asteroid code, with a smaller rf_threshold
     appropriate for quadrotor scales.
+
+    invert_ratio=True  : use r_norm / pos0_norm  (obstacle-avoidance scenarios —
+                         Ee grows as the drone moves away from start, encouraging
+                         stronger steering when far from home and near obstacles)
+    invert_ratio=False : use pos0_norm / r_norm  (standard point-to-point —
+                         Ee shrinks as the drone closes on the target)
     """
     if r_norm < rf_threshold:
         return 0.0
 
-    r_ratio =  pos0_norm / r_norm if r_norm > 1e-12 else 0.0
+    #if invert_ratio:
+        #r_ratio = r_norm / pos0_norm if pos0_norm > 1e-12 else 0.0
+    #else:
+        
+    r_ratio = pos0_norm / r_norm if r_norm > 1e-12 else 0.0
 
     if ee_function == "linear":
         return Ee0 * r_ratio
@@ -236,7 +246,9 @@ def build_constraints(t, states, params):
 
     r_norm    = np.linalg.norm(r - params["rfd"])
     pos0_norm = np.linalg.norm(params["pos0"] - params["rfd"])
-    Ee = compute_distance_based_ee(r_norm, pos0_norm, Ee0, ee_function, rf_threshold=2.0)
+    has_obstacles = bool(params.get("obstacles"))
+    Ee = compute_distance_based_ee(r_norm, pos0_norm, Ee0, ee_function,
+                                   rf_threshold=2.0, invert_ratio=has_obstacles)
 
     alpha1, alpha2, alpha3, alpha4, Se = heading_error_coefficients(
         r, v, params["rfd"], g
@@ -283,10 +295,11 @@ def build_constraints(t, states, params):
         return (Tmax / m)**2 - (cmd[0]**2 + cmd[1]**2 + cmd[2]**2)
 
     def ineq_ground_avoidance(cmd):
-        # Enforces Z >= 0 (drone does not go underground)
-        # Required braking acceleration: a_req = vz^2 / (2 * max(z - margin, 0.01))
-        # We need cmd[2] + g[2] >= a_req => cmd[2] + g[2] - a_req >= 0
-        if v[2] < 0:
+        # Prevents free fall.  Activates whenever v[2] <= 0 (level OR descending),
+        # requiring at least full gravity compensation in the z-command.
+        # Using < 0 would skip this at v[2]=0 (level flight), allowing SLSQP
+        # to return cmd[2]=0 and letting gravity cause a free-fall step.
+        if v[2] <= 0:
             z_safe = max(r[2] - 0.5, 0.01)  # 0.5 m margin
             a_req = (v[2]**2) / (2.0 * z_safe)
             return (cmd[2] + g[2]) - a_req

@@ -1,0 +1,225 @@
+
+====================================================================================================
+  TABLE 1 — Summary Results (all scenarios × Ee functions)
+====================================================================================================
+  FS    Ee Function         Conv   tf (s)    Pos_Err (m)   |vf| (m/s)   ∫|a|dt     Δm (kg)    mf (kg)    Tr (s)     Ts (s)   
+  ────┼──────────────────┼─────┼────────┼────────────┼───────────┼─────────┼─────────┼─────────┼─────────┼─────────
+  FS1   linear              YES    29.30     0.4998        0.315550     400.13814  0.00000    3.5000     23.88      5.44     
+  FS1   quadratic           YES    29.24     0.4985        0.314730     358.38168  0.00000    3.5000     23.82      5.44     
+  FS1   cubic               NO     24.32     60.7616       2.095841     248.47620  0.00000    3.5000     —          —        
+  FS1   exponential         NO     23.98     60.8574       2.145342     240.07155  0.00000    3.5000     —          —        
+  FS1   saturation          YES    29.36     0.4960        0.313146     410.19804  0.00000    3.5000     23.92      5.46     
+  FS1   quadratic_cubic     YES    29.20     0.4968        0.313660     408.96270  0.00000    3.5000     23.76      5.46     
+  ····┼··················┼·····┼········┼············┼···········┼·········┼·········┼·········┼·········┼·········
+  FS2   linear              YES    43.28     0.4968        0.377624     701.19817  0.00000    3.5000     0.10       43.20    
+  FS2   quadratic           NO     38.16     23.4572       2.795091     599.72169  0.00000    3.5000     0.10       —        
+  FS2   cubic               NO     29.06     42.4559       4.203466     444.74230  0.00000    3.5000     0.10       —        
+  FS2   exponential         NO     29.36     41.1646       4.133794     455.96528  0.00000    3.5000     0.06       —        
+  FS2   saturation          YES    43.36     0.4962        0.376784     619.39641  0.00000    3.5000     0.10       43.28    
+  FS2   quadratic_cubic     YES    43.48     0.4965        0.375885     474.08017  0.00000    3.5000     0.10       43.40    
+  ····┼··················┼·····┼········┼············┼···········┼·········┼·········┼·········┼·········┼·········
+  FS3   linear              NO     3.40      144.4982      3.357748     0.91092    0.00000    3.5000     0.00       —        
+  FS3   quadratic           NO     3.40      144.5000      3.352459     0.90628    0.00000    3.5000     0.00       —        
+  FS3   cubic               NO     3.40      144.4295      3.673336     1.25122    0.00000    3.5000     0.00       —        
+  FS3   exponential         NO     3.40      144.3354      3.595625     1.71121    0.00000    3.5000     0.00       —        
+  FS3   saturation          NO     3.42      144.4105      3.359599     1.20576    0.00000    3.5000     0.00       —        
+  FS3   quadratic_cubic     NO     3.42      144.4346      3.345260     1.13417    0.00000    3.5000     0.00       —        
+  ····┼··················┼·····┼········┼············┼···········┼·········┼·········┼·········┼·········┼·········
+  FS4   linear              YES    84.28     0.4962        0.308302     1398.29019  0.00000    3.5000     78.56      5.74     
+  FS4   quadratic           YES    87.08     0.4958        0.296968     1337.38991  0.00000    3.5000     81.24      5.86     
+  FS4   cubic               NO     117.64    200.8905      0.640202     1438.76654  0.00000    3.5000     —          —        
+  FS4   exponential         NO     104.80    200.4589      0.643386     1328.97480  0.00000    3.5000     —          —        
+  FS4   saturation          YES    79.08     0.4962        0.313286     1241.15472  0.00000    3.5000     73.50      5.60     
+  FS4   quadratic_cubic     YES    80.14     0.4977        0.314215     1056.93186  0.00000    3.5000     74.52      5.64     
+
+
+====================================================================================================
+  TABLE 2 — Computational-Time Statistics per Case
+====================================================================================================
+  FS    Ee Function         N_steps    Mean(ms)    Med(ms)     Max(ms)     Std(ms)     % of dt  
+  ────┼──────────────────┼─────────┼──────────┼──────────┼──────────┼──────────┼─────────
+  FS1   linear              1466       25.645      8.176       600.813     57.228      128.2%   
+  FS1   quadratic           1463       36.961      9.469       675.288     81.314      184.8%   
+  FS1   cubic               1217       124.834     48.581      918.624     173.759     624.2%   
+  FS1   exponential         1200       116.899     46.026      683.888     162.154     584.5%   
+  FS1   saturation          1469       19.949      7.468       523.192     41.872      99.7%    
+  FS1   quadratic_cubic     1461       17.769      8.210       455.796     34.305      88.8%    
+  ····┼··················┼·········┼··········┼··········┼··········┼··········┼·········
+  FS2   linear              2165       488.636     614.155     1020.845    271.730     2443.2%  
+  FS2   quadratic           1909       490.150     610.515     924.014     231.066     2450.8%  
+  FS2   cubic               1454       459.535     603.545     910.323     232.359     2297.7%  
+  FS2   exponential         1469       512.600     627.259     1112.183    229.912     2563.0%  
+  FS2   saturation          2169       63.037      20.469      653.303     122.986     315.2%   
+  FS2   quadratic_cubic     2175       14.567      10.613      605.539     25.104      72.8%    
+  ····┼··················┼·········┼··········┼··········┼··········┼··········┼·········
+  FS3   linear              171        65.639      34.451      504.195     92.730      328.2%   
+  FS3   quadratic           171        61.682      31.879      498.430     84.400      308.4%   
+  FS3   cubic               171        54.952      30.580      550.513     78.752      274.8%   
+  FS3   exponential         171        81.021      39.401      489.395     108.274     405.1%   
+  FS3   saturation          172        73.241      31.065      543.099     109.708     366.2%   
+  FS3   quadratic_cubic     172        53.361      29.378      478.255     79.641      266.8%   
+  ····┼··················┼·········┼··········┼··········┼··········┼··········┼·········
+  FS4   linear              4215       42.636      14.470      627.819     84.001      213.2%   
+  FS4   quadratic           4355       56.984      16.535      825.857     102.129     284.9%   
+  FS4   cubic               5883       97.913      57.468      679.013     127.972     489.6%   
+  FS4   exponential         5241       106.673     48.386      677.864     145.962     533.4%   
+  FS4   saturation          3955       24.128      14.437      621.218     42.576      120.6%   
+  FS4   quadratic_cubic     4008       17.852      12.704      612.175     28.794      89.3%    
+
+
+====================================================================================================
+  TABLE 3 — Convergence Analysis
+====================================================================================================
+
+  CONVERGED  (11 / 24 cases)
+
+  Case                       tf(s)    Pos_Err(m)    |vf|(m/s)     Tr(s)     Ts(s)   Best_CE?
+  ──────────────────────────────────────────────────────────────────────────────────────────
+  FS1/linear                 29.30        0.4998     0.315550     23.88      5.44           
+  FS1/quadratic              29.24        0.4985     0.314730     23.82      5.44     ★ BEST
+  FS1/saturation             29.36        0.4960     0.313146     23.92      5.46           
+  FS1/quadratic_cubic        29.20        0.4968     0.313660     23.76      5.46           
+  FS2/linear                 43.28        0.4968     0.377624      0.10     43.20           
+  FS2/saturation             43.36        0.4962     0.376784      0.10     43.28           
+  FS2/quadratic_cubic        43.48        0.4965     0.375885      0.10     43.40     ★ BEST
+  FS4/linear                 84.28        0.4962     0.308302     78.56      5.74           
+  FS4/quadratic              87.08        0.4958     0.296968     81.24      5.86           
+  FS4/saturation             79.08        0.4962     0.313286     73.50      5.60           
+  FS4/quadratic_cubic        80.14        0.4977     0.314215     74.52      5.64     ★ BEST
+
+  FAILED / DID NOT CONVERGE  (13 cases)
+
+  Case                    Reason & Diagnosis
+  ──────────────────────────────────────────────────────────────────────────────────────────
+  FS1/cubic               Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS1/exponential         Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS2/quadratic           Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS2/cubic               Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS2/exponential         Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS3/linear              Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS3/quadratic           Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS3/cubic               Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS3/exponential         Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS3/saturation          Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS3/quadratic_cubic     Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS4/cubic               Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+  FS4/exponential         Reason: ground_collision (hit z=0 before target)
+                          Diagnosis: Z-velocity not arrested before ground — increase Tmax or reduce bz/cz to allow more braking
+
+
+====================================================================================================
+  TABLE 4 — Per-Scenario Ee-Function Rankings (by Control Effort)
+====================================================================================================
+
+  FS1 — Point-to-Point Calm
+  Rank   Ee Function           Conv      ∫|a|dt      Δm(kg)     |vf|(m/s)    Pos_Err(m)
+  ────────────────────────────────────────────────────────────────────────────────
+  1    ★ quadratic              YES   358.38168     0.00000      0.314730        0.4985
+  2      linear                 YES   400.13814     0.00000      0.315550        0.4998
+  3      quadratic_cubic        YES   408.96270     0.00000      0.313660        0.4968
+  4      saturation             YES   410.19804     0.00000      0.313146        0.4960
+  5    ✗ exponential             NO   240.07155     0.00000      2.145342       60.8574
+  6    ✗ cubic                   NO   248.47620     0.00000      2.095841       60.7616
+
+  FS2 — Windy Delivery
+  Rank   Ee Function           Conv      ∫|a|dt      Δm(kg)     |vf|(m/s)    Pos_Err(m)
+  ────────────────────────────────────────────────────────────────────────────────
+  1    ★ quadratic_cubic        YES   474.08017     0.00000      0.375885        0.4965
+  2      saturation             YES   619.39641     0.00000      0.376784        0.4962
+  3      linear                 YES   701.19817     0.00000      0.377624        0.4968
+  4    ✗ cubic                   NO   444.74230     0.00000      4.203466       42.4559
+  5    ✗ exponential             NO   455.96528     0.00000      4.133794       41.1646
+  6    ✗ quadratic               NO   599.72169     0.00000      2.795091       23.4572
+
+  FS3 — Urban Obstacle Course
+  Rank   Ee Function           Conv      ∫|a|dt      Δm(kg)     |vf|(m/s)    Pos_Err(m)
+  ────────────────────────────────────────────────────────────────────────────────
+  1    ✗ quadratic               NO     0.90628     0.00000      3.352459      144.5000
+  2    ✗ linear                  NO     0.91092     0.00000      3.357748      144.4982
+  3    ✗ quadratic_cubic         NO     1.13417     0.00000      3.345260      144.4346
+  4    ✗ saturation              NO     1.20576     0.00000      3.359599      144.4105
+  5    ✗ cubic                   NO     1.25122     0.00000      3.673336      144.4295
+  6    ✗ exponential             NO     1.71121     0.00000      3.595625      144.3354
+
+  FS4 — High-Altitude Density Change
+  Rank   Ee Function           Conv      ∫|a|dt      Δm(kg)     |vf|(m/s)    Pos_Err(m)
+  ────────────────────────────────────────────────────────────────────────────────
+  1    ★ quadratic_cubic        YES  1056.93186     0.00000      0.314215        0.4977
+  2      saturation             YES  1241.15472     0.00000      0.313286        0.4962
+  3      quadratic              YES  1337.38991     0.00000      0.296968        0.4958
+  4      linear                 YES  1398.29019     0.00000      0.308302        0.4962
+  5    ✗ exponential             NO  1328.97480     0.00000      0.643386      200.4589
+  6    ✗ cubic                   NO  1438.76654     0.00000      0.640202      200.8905
+
+
+====================================================================================================
+  TABLE 5 — Initial & Final States per Case
+====================================================================================================
+
+  FS1 — Point-to-Point Calm
+  Initial position : (   0.000,    0.000,   10.000) m
+  Initial velocity : (   5.000,    1.500,    2.000) m/s
+  Target position  : ( 100.000,   20.000,   60.000) m
+
+  Ee Function          Conv     xf (m)    yf (m)    zf (m)   vxf(m/s)  vyf(m/s)  vzf(m/s)   |Δpos|(m)   |vf|(m/s)
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  linear                YES    99.5798   20.0305   59.7310     0.2653   -0.0192    0.1698      0.4998    0.315550
+  quadratic             YES    99.5783   20.0283   59.7356     0.2662   -0.0179    0.1669      0.4985    0.314730
+  cubic                  NO    90.4788   21.1483    0.0000     2.0409    0.4767    0.0000     60.7616    2.095841
+  exponential            NO    89.8790   21.0897    0.0000     2.0718    0.5571    0.0000     60.8574    2.145342
+  saturation            YES    99.5850   20.0310   59.7301     0.2620   -0.0196    0.1704      0.4960    0.313146
+  quadratic_cubic       YES    99.5843   20.0286   59.7294     0.2624   -0.0180    0.1709      0.4968    0.313660
+
+  FS2 — Windy Delivery
+  Initial position : (   0.000,    0.000,   20.000) m
+  Initial velocity : (   6.000,    1.000,    1.000) m/s
+  Target position  : ( 200.000,    0.000,   20.000) m
+
+  Ee Function          Conv     xf (m)    yf (m)    zf (m)   vxf(m/s)  vyf(m/s)  vzf(m/s)   |Δpos|(m)   |vf|(m/s)
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  linear                YES   199.5177    0.1086   19.9507     0.3756   -0.0236    0.0305      0.4968    0.377624
+  quadratic              NO   187.7430   -0.0929    0.0000     2.7920   -0.1314    0.0000     23.4572    2.795091
+  cubic                  NO   162.5502    0.1261    0.0000     4.2035    0.0027    0.0000     42.4559    4.203466
+  exponential            NO   164.0205    0.0378    0.0000     4.1334   -0.0536    0.0000     41.1646    4.133794
+  saturation            YES   199.5163    0.1039   19.9619     0.3752   -0.0247    0.0236      0.4962    0.376784
+  quadratic_cubic       YES   199.5150    0.1014   19.9686     0.3743   -0.0289    0.0195      0.4965    0.375885
+
+  FS3 — Urban Obstacle Course
+  Initial position : (   0.000,    0.000,   50.000) m
+  Initial velocity : (   5.000,    0.000,    0.000) m/s
+  Target position  : ( 150.000,    0.000,   50.000) m
+
+  Ee Function          Conv     xf (m)    yf (m)    zf (m)   vxf(m/s)  vyf(m/s)  vzf(m/s)   |Δpos|(m)   |vf|(m/s)
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  linear                 NO    14.4385    1.6772    0.0000     3.3206    0.4983    0.0000    144.4982    3.357748
+  quadratic              NO    14.4366    1.6772    0.0000     3.3152    0.4983    0.0000    144.5000    3.352459
+  cubic                  NO    14.5117    1.6771    0.0000     3.6394    0.4983    0.0000    144.4295    3.673336
+  exponential            NO    14.6121    1.6813    0.0000     3.5612    0.4964    0.0000    144.3354    3.595625
+  saturation             NO    14.5321    1.6874    0.0000     3.3224    0.4983    0.0000    144.4105    3.359599
+  quadratic_cubic        NO    14.5064    1.6872    0.0000     3.3079    0.4983    0.0000    144.4346    3.345260
+
+  FS4 — High-Altitude Density Change
+  Initial position : (   0.000,    0.000,   10.000) m
+  Initial velocity : (   2.000,    1.000,    3.000) m/s
+  Target position  : (  80.000,    0.000,  200.000) m
+
+  Ee Function          Conv     xf (m)    yf (m)    zf (m)   vxf(m/s)  vyf(m/s)  vzf(m/s)   |Δpos|(m)   |vf|(m/s)
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  linear                YES    80.1193   -0.0035  199.5184    -0.0615    0.0022    0.3021      0.4962    0.308302
+  quadratic             YES    80.1836    0.0041  199.5395    -0.0757   -0.0026    0.2871      0.4958    0.296968
+  cubic                  NO    98.8940    0.1126    0.0000     0.4028    0.4976    0.0000    200.8905    0.640202
+  exponential            NO    93.5564    0.1228    0.0000     0.4078   -0.4976    0.0000    200.4589    0.643386
+  saturation            YES    80.0450    0.0081  199.5059    -0.0285   -0.0051    0.3119      0.4962    0.313286
+  quadratic_cubic       YES    80.0569   -0.0036  199.5056    -0.0359    0.0022    0.3122      0.4977    0.314215

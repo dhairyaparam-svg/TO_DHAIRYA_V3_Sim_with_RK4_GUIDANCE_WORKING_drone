@@ -36,8 +36,8 @@ DEFAULT_PARAMS = {
     "g_vec": np.array([0.0, 0.0, -9.81]),
 
     # Quadrotor physical properties
-    "Tmax": 50.0,          # Max total thrust (N) — about 2.0 g for 2.5 kg
-    "m0":   2.5,           # Initial mass (kg)
+    "Tmax": 60.0,          # Max total thrust (N) — about 2.0 g for 2.5 kg
+    "m0":   3.5,           # Initial mass (kg)
     "c":    30000000000000000000000.0,        # Effective exhaust velocity (electric → large c, tiny mass loss)
 
     # Aerodynamics
@@ -68,14 +68,14 @@ DEFAULT_PARAMS = {
     "cx": 0, "cy": 0, "cz": 0,
 
     # Final velocity target (hover at destination)
-    "vfd": np.array([0.0, 0.0, 1.5]),
+    "vfd": np.array([0.0, 0.0, 0.0]),
 }
 
 # =============================================================================
 # Flight Scenarios
 # =============================================================================
 
-FLIGHT_SCENARIOS = {
+FLIGHT_SCENARIOS_og = {
     # FS1: Simple point-to-point, no wind, no obstacles
     1: {
         "name": "FS1 — Point-to-Point Calm",
@@ -101,29 +101,45 @@ FLIGHT_SCENARIOS = {
         },
     },
 
-    # FS3: Navigate around three spherical obstacles
+    # FS3: Slalom through three obstacles placed on ALTERNATE SIDES of the path.
+    #
+    # Design rules (key to avoid the local-minimum / infinite-repulsion trap):
+    #   • Flight path:  pos0=[0,0,50] → rfd=[150,0,50]  (straight along x-axis at y=0,z=50)
+    #   • Obstacle centre offset in y: ±7 m  (obstacles stagger left/right)
+    #   • Radius: 4 m  →  surface at |y|=3 m  →  3 m clear corridor either side of path
+    #   • margin=6: influence zone extends 6 m from surface, reaching y=|3−6|=−3 m
+    #                (i.e. the influence zone just crosses the path at y=0)
+    #   • At closest approach (drone at y=0 passing x=xobs):
+    #       dist_to_surface = 3 m < margin=6  →  in zone
+    #       penetration = 1/3 − 1/6 = 0.167
+    #       force = k_rep × 0.167² ≈ 30 × 0.028 ≈ 0.83 m/s²  (pure lateral, y-axis)
+    #   • This lateral push creates a gentle slalom without blocking x-progress.
     3: {
         "name": "FS3 — Urban Obstacle Course",
-        "pos0": np.array([0.0, 0.0, 30.0]),
-        "vel0": np.array([5.0, 1.0, 1.0]),
-        "rfd":  np.array([150.0, 0.0, 20.0]),
-        "tf":   80.0,
+        "pos0": np.array([0.0,   0.0, 50.0]),
+        # vel0 MUST NOT be perfectly aligned with (rfd - pos0) = [150,0,0].
+        # A perfectly aligned vel0=[5,0,0] makes heading error Se=0 → all
+        # SMC alpha-coefficients=0 → SLSQP equality degenerates to 0=0 →
+        # cmd=[0,0,0] → free fall.  The y-component breaks this degeneracy.
+        "vel0": np.array([5.0,   0.5,  0.0]),
+        "rfd":  np.array([150.0, 0.0, 50.0]),
+        "tf":   90.0,
         "obstacles": [
-            make_obstacle([40.0,  5.0, 30.0], 8.0),
-            make_obstacle([80.0, -5.0, 35.0], 8.0),
-            make_obstacle([120.0, 3.0, 28.0],  8.0),
+            make_obstacle([ 40.0,  7.0, 50.0], 4.0),   # right side  → pushes drone left
+            make_obstacle([ 80.0, -7.0, 50.0], 4.0),   # left  side  → pushes drone right
+            make_obstacle([120.0,  7.0, 50.0], 4.0),   # right side  → pushes drone left
         ],
-        "obstacle_margin": 1.0,
-        "obstacle_k_rep": 80.0,
+        "obstacle_margin": 0.5,
+        "obstacle_k_rep":  30.0,
     },
 
-    # FS4: Climb from ground level to 500 m — density drops ~6 %
+    # FS4: Climb to 200 m — ISA density drops ~2.5 % — tractable for SMC
     4: {
         "name": "FS4 — High-Altitude Density Change",
-        "pos0": np.array([0.0, 0.0, 5.0]),
-        "vel0": np.array([2.0, 1.0, 5.0]),
-        "rfd":  np.array([50.0, 0.0, 500.0]),
-        "tf":   180.0,
+        "pos0": np.array([0.0, 0.0, 10.0]),
+        "vel0": np.array([2.0, 1.0, 3.0]),
+        "rfd":  np.array([80.0, 0.0, 200.0]),
+        "tf":   120.0,
         "wind": {
             "base":      np.array([2.0, 0.0, 0.0]),
             "gust_amp":  1.5,
@@ -132,6 +148,44 @@ FLIGHT_SCENARIOS = {
             "alt_scale": 200.0,
         },
     },
+}
+
+FLIGHT_SCENARIOS = {
+    
+    
+
+    # FS3: Slalom through three obstacles placed on ALTERNATE SIDES of the path.
+    #
+    # Design rules (key to avoid the local-minimum / infinite-repulsion trap):
+    #   • Flight path:  pos0=[0,0,50] → rfd=[150,0,50]  (straight along x-axis at y=0,z=50)
+    #   • Obstacle centre offset in y: ±7 m  (obstacles stagger left/right)
+    #   • Radius: 4 m  →  surface at |y|=3 m  →  3 m clear corridor either side of path
+    #   • margin=6: influence zone extends 6 m from surface, reaching y=|3−6|=−3 m
+    #                (i.e. the influence zone just crosses the path at y=0)
+    #   • At closest approach (drone at y=0 passing x=xobs):
+    #       dist_to_surface = 3 m < margin=6  →  in zone
+    #       penetration = 1/3 − 1/6 = 0.167
+    #       force = k_rep × 0.167² ≈ 30 × 0.028 ≈ 0.83 m/s²  (pure lateral, y-axis)
+    #   • This lateral push creates a gentle slalom without blocking x-progress.
+    3: {
+        "name": "FS3 — Urban Obstacle Course",
+        "pos0": np.array([0.0,   0.0, 50.0]),
+        # vel0 MUST NOT be perfectly aligned with (rfd - pos0) = [150,0,0].
+        # A perfectly aligned vel0=[5,0,0] makes heading error Se=0 → all
+        # SMC alpha-coefficients=0 → SLSQP equality degenerates to 0=0 →
+        # cmd=[0,0,0] → free fall.  The y-component breaks this degeneracy.
+        "vel0": np.array([5.0,   0.5,  0.0]),
+        "rfd":  np.array([150.0, 0.0, 50.0]),
+        "tf":   90.0,
+        "obstacles": [
+            make_obstacle([ 40.0,  7.0, 50.0], 4.0),   # right side  → pushes drone left
+            make_obstacle([ 80.0, -7.0, 50.0], 4.0),   # left  side  → pushes drone right
+            make_obstacle([120.0,  7.0, 50.0], 4.0),   # right side  → pushes drone left
+        ],
+        "obstacle_margin": 0.5,
+        "obstacle_k_rep":  30.0,
+    },
+
 }
 
 
