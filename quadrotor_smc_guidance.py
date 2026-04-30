@@ -314,7 +314,7 @@ def build_constraints(t, states, params):
         {"type": "ineq", "fun": ineq_vel_zL},
         {"type": "ineq", "fun": ineq_vel_zU},
         {"type": "ineq", "fun": ineq_thrust},
-        {"type": "ineq", "fun": ineq_ground_avoidance},
+        #{"type": "ineq", "fun": ineq_ground_avoidance},
     ]
     return constraints
 
