@@ -172,7 +172,7 @@ def obstacle_penalty(pos, obstacles, margin=0.5, k_rep=0.01):
         if dist_to_surface < margin:
             # If inside the obstacle, apply max repulsion to push it out
             if dist_to_surface <= 0.01:
-                dist_to_surface = 0.1
+                dist_to_surface = 1
                 
             # Repulsion blows up as dist_to_surface -> 0
             penetration = 1.0 / dist_to_surface - 1.0 / margin

@@ -70,7 +70,7 @@ def obstacle_acceleration(pos, params):
     return obstacle_penalty(
         pos, params["obstacles"],
         margin=params.get("obstacle_margin", 0.5),
-        k_rep=params.get("obstacle_k_rep", 0.1),
+        k_rep=params.get("obstacle_k_rep", 1),
     )
 
 
