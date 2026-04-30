@@ -320,7 +320,7 @@ def build_constraints(t, states, params):
         {"type": "ineq", "fun": ineq_vel_zL},
         {"type": "ineq", "fun": ineq_vel_zU},
         {"type": "ineq", "fun": ineq_thrust},
-        {"type": "ineq", "fun": ineq_ground_avoidance},
+        #{"type": "ineq", "fun": ineq_ground_avoidance},
     ]
     return constraints
 
@@ -357,7 +357,7 @@ def terminal_guidance(states, params):
     a_cmd = Kp * pos_err + Kd * vel_err - g_vec   # compensate gravity
 
     # Add obstacle avoidance
-    a_cmd += obstacle_acceleration(r, v, params)
+    a_cmd = obstacle_acceleration(r, v, params)
 
     # Clamp to thrust limit
     a_max = params["Tmax"] / m
@@ -399,7 +399,7 @@ def guidance(t, states, params):
     # Add obstacle avoidance on top of SLSQP result
     a_obs = obstacle_acceleration(r, v, params)
     g = environment_acceleration(r, v, t, params)
-    cmd = g + cmd + a_obs 
+    cmd = cmd + a_obs 
 
     # Clamp to thrust limit
     m = states[6]
