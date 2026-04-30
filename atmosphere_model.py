@@ -153,33 +153,142 @@ def make_obstacle(centre, radius):
     return {"centre": np.array(centre, dtype=float), "radius": float(radius)}
 
 
-def obstacle_penalty(pos, obstacles, margin=0.5, k_rep=0.01):
+def obstacle_vortex_guidance(pos, vel, target_pos, obstacles,
+                             D_start=8.0, D_keep=2.0, k_rep=50.0):
     """
-    Repulsive acceleration that pushes the vehicle away from obstacles.
+    3-D vortex obstacle-guidance model  (Wang & Xiang, CAC 2022 — adapted).
 
-    Uses an artificial-potential-field approach: when the vehicle enters
-    the obstacle's influence zone (margin distance from the surface), a radial 
-    repulsive force grows quadratically and approaches infinity at the surface.
+    Core idea
+    ---------
+    Instead of a purely *radial* repulsive force (classic APF), each obstacle
+    generates a *tangential* guidance acceleration that steers the vehicle
+    *around* the obstacle toward the target.  The direction is computed by
+    projecting the global-path unit vector (drone → target) onto the tangent
+    plane of the obstacle sphere — this is the direction that simultaneously
+    avoids the sphere *and* makes maximum progress toward the goal.
+
+    This eliminates the two main failures of APF:
+      • Local minima  (obstacle directly in path → APF stalls, vortex steers around)
+      • Large abrupt turns  (APF repulsion is purely radial; vortex blends smoothly
+                             between "go forward" and "slide around the sphere")
+
+    Zones  (D = clearance from obstacle surface)
+    --------------------------------------------
+    D > D_start       : no influence
+    D_keep ≤ D ≤ D_start : soft-avoidance zone — guidance direction blends from
+                           global direction (at D_start) to tangential (at D_keep);
+                           quadratic APF magnitude grows as drone approaches
+    D < D_keep        : hard-avoidance zone — strong radial repulsion plus
+                           tangential slide to move drone along the sphere surface
+
+    Multi-obstacle handling
+    -----------------------
+    Forces are *summed* so that two simultaneous threats both act.
+    Each obstacle is weighted by 1/D² (closer = more urgent, eq. 13 in paper).
+    An obstacle whose surface the drone is already moving *away from* receives
+    zero weight (drone is escaping — no counterproductive push).
+
+    Parameters
+    ----------
+    pos        : (3,)  current position          [m]
+    vel        : (3,)  current velocity          [m/s]
+    target_pos : (3,)  target / destination      [m]
+    obstacles  : list of {"centre": (3,), "radius": float}
+    D_start    : float  distance from surface where influence begins  [m]
+    D_keep     : float  desired minimum clearance from surface         [m]
+    k_rep      : float  overall force gain
+
+    Returns
+    -------
+    a_total : (3,)  avoidance acceleration  [m/s²]
     """
-    a_rep = np.zeros(3)
-    
-    # Spherical obstacle repulsion
+    if not obstacles:
+        return np.zeros(3)
+
+    R      = target_pos - pos
+    R_norm = np.linalg.norm(R)
+    if R_norm < 1e-6:
+        return np.zeros(3)
+    beta_vec = R / R_norm          # unit vector: drone → target  (global direction)
+
+    total_force = np.zeros(3)
+
     for obs in obstacles:
-        diff = pos - obs["centre"]
+        centre = np.asarray(obs["centre"], dtype=float)
+        radius = float(obs.get("radius", 1.0))
+
+        diff = pos - centre            # vector: obstacle centre → drone
         dist = np.linalg.norm(diff)
-        dist_to_surface = dist - obs["radius"]
-        
-        if dist_to_surface < margin:
-            # If inside the obstacle, apply max repulsion to push it out
-            if dist_to_surface <= 0.01:
-                dist_to_surface = 1
-                
-            # Repulsion blows up as dist_to_surface -> 0
-            penetration = 1.0 / dist_to_surface - 1.0 / margin
-            direction = diff / dist if dist > 1e-6 else np.array([0., 0., 1.])
-            a_rep += k_rep * (penetration**2) * direction
-            
-    return a_rep
+        if dist < 1e-6:
+            continue
+
+        n_hat = diff / dist            # outward unit normal (away from obstacle)
+        D     = dist - radius          # clearance from obstacle surface
+
+        if D > D_start:
+            continue                   # outside influence zone — no effect
+
+        # ------------------------------------------------------------------
+        # Tangential guidance direction  (core of vortex model)
+        #
+        # Project global direction beta_vec onto the sphere tangent plane.
+        # Result: the direction tangent to the sphere that points most toward
+        # the target — steers around the obstacle without losing progress.
+        # ------------------------------------------------------------------
+        beta_n   = np.dot(beta_vec, n_hat)
+        beta_tan = beta_vec - beta_n * n_hat   # tangential projection (un-normalised)
+        t_norm   = np.linalg.norm(beta_tan)
+
+        if t_norm < 1e-6:
+            # beta_vec is radial: obstacle lies exactly on the drone-target line.
+            # Pick the most upward perpendicular direction as tangential guide,
+            # mirroring the paper's "left/right" vortex direction choice.
+            up   = np.array([0., 0., 1.])
+            perp = np.cross(n_hat, up)
+            p_norm = np.linalg.norm(perp)
+            if p_norm < 1e-6:          # n_hat is vertical — fall back to y-axis
+                perp   = np.cross(n_hat, np.array([0., 1., 0.]))
+                p_norm = np.linalg.norm(perp)
+            beta_tan = perp / max(p_norm, 1e-6)
+        else:
+            beta_tan = beta_tan / t_norm
+
+        # ------------------------------------------------------------------
+        # Blending weight k  (Eq. 16 from Wang & Xiang 2022, adapted to 3-D)
+        # k = 0  at D = D_start  →  follow global direction
+        # k = 1  at D = D_keep   →  pure tangential guidance
+        # ------------------------------------------------------------------
+        D_clamped    = float(np.clip(D, D_keep, D_start))
+        k            = (D_start - D_clamped) / (D_start - D_keep)
+
+        g_raw        = (1.0 - k) * beta_vec + k * beta_tan
+        g_norm       = np.linalg.norm(g_raw)
+        guidance_dir = g_raw / g_norm if g_norm > 1e-6 else beta_tan
+
+        # ------------------------------------------------------------------
+        # Force magnitude
+        # ------------------------------------------------------------------
+        if D >= D_keep:
+            # Soft zone: quadratic APF-style penalty from D_start inward
+            pen   = 1.0 / max(D, 0.05) - 1.0 / D_start
+            a_obs = k_rep * (pen ** 2) * guidance_dir
+        else:
+            # Hard zone: strong radial repulsion + tangential slide
+            pen   = 1.0 / max(D, 0.05) - 1.0 / D_keep
+            a_obs = k_rep * (pen ** 2) * (n_hat + beta_tan)
+
+        # ------------------------------------------------------------------
+        # Distance-squared weighting; zero if drone is already moving away
+        # (eq. 13 paper spirit — don't fight the drone when it is escaping)
+        # ------------------------------------------------------------------
+        W          = 1.0 / max(D ** 2, 0.01)
+        vel_toward = np.dot(vel, -n_hat)       # positive = approaching obstacle
+        if vel_toward < 0.0 and D > D_keep:
+            W = 0.0                            # already escaping — skip
+
+        total_force += W * a_obs
+
+    return total_force
 
 
 def check_obstacle_violation(pos, obstacles):

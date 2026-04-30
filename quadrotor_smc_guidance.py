@@ -26,7 +26,7 @@ from matplotlib.animation import FuncAnimation
 # Project-local imports
 from atmosphere_model import (
     isa_density, drag_acceleration, wind_model,
-    obstacle_penalty, check_obstacle_violation,
+    obstacle_vortex_guidance, check_obstacle_violation,
 )
 from quadrotor_scenarios import (
     build_params as scenarios_build_params,
@@ -63,14 +63,20 @@ def environment_acceleration(pos, vel, t, params):
     return g + a_drag
 
 
-def obstacle_acceleration(pos, params):
-    """Repulsive acceleration from obstacles (kept separate from SLSQP env model)."""
+def obstacle_acceleration(pos, vel, params):
+    """Vortex guidance acceleration from obstacles (Wang & Xiang 2022, adapted)."""
     if not params.get("obstacles"):
         return np.zeros(3)
-    return obstacle_penalty(
-        pos, params["obstacles"],
-        margin=params.get("obstacle_margin", 0.5),
-        k_rep=params.get("obstacle_k_rep", 1),
+    # D_start: influence zone from surface — support old 'obstacle_margin' key too
+    D_start = params.get("obstacle_D_start",
+                params.get("obstacle_margin", 8.0))
+    D_keep  = params.get("obstacle_D_keep", D_start * 0.3)
+    return obstacle_vortex_guidance(
+        pos, vel, params["rfd"],
+        params["obstacles"],
+        D_start=D_start,
+        D_keep=D_keep,
+        k_rep=params.get("obstacle_k_rep", 50.0),
     )
 
 
@@ -351,7 +357,7 @@ def terminal_guidance(states, params):
     a_cmd = Kp * pos_err + Kd * vel_err - g_vec   # compensate gravity
 
     # Add obstacle avoidance
-    a_cmd += obstacle_acceleration(r, params)
+    a_cmd += obstacle_acceleration(r, v, params)
 
     # Clamp to thrust limit
     a_max = params["Tmax"] / m
@@ -372,6 +378,7 @@ def guidance(t, states, params):
     error sliding surface degenerates as R → 0.
     """
     r = states[0:3]
+    v = states[3:6]
     dist = np.linalg.norm(r - params["rfd"])
     terminal_radius = params.get("terminal_radius", 15.0)
 
@@ -390,7 +397,7 @@ def guidance(t, states, params):
     cmd = res.x
 
     # Add obstacle avoidance on top of SLSQP result
-    a_obs = obstacle_acceleration(r, params)
+    a_obs = obstacle_acceleration(r, v, params)
     cmd = cmd + a_obs
 
     # Clamp to thrust limit
@@ -416,7 +423,7 @@ def state_equations_rk4(states, command, t, params):
     m = states[6]
 
     g = environment_acceleration(r, v, t, params)
-    a_obs = obstacle_acceleration(r, params)
+    a_obs = obstacle_acceleration(r, v, params)
 
     a_total = np.linalg.norm(command)
     thrust  = m * a_total

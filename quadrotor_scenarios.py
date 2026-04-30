@@ -55,8 +55,9 @@ DEFAULT_PARAMS = {
 
     # Obstacles (default: none)
     "obstacles": [],
-    "obstacle_margin": 5.0,
-    "obstacle_k_rep": 50.0,
+    "obstacle_D_start": 8.0,   # influence zone: starts this far from surface [m]
+    "obstacle_D_keep":  2.0,   # desired minimum clearance from surface        [m]
+    "obstacle_k_rep":  50.0,   # vortex guidance force gain
 
     # SMC-IO guidance parameters  (tuned for ~100 m scale manoeuvres)
     "Ee0": 2.0,
@@ -101,36 +102,38 @@ FLIGHT_SCENARIOS = {
         },
     },
 
-    # FS3: Slalom through three obstacles placed on ALTERNATE SIDES of the path.
+    # FS3: Slalom through three sphere obstacles that *partially block* the direct path.
     #
-    # Design rules (key to avoid the local-minimum / infinite-repulsion trap):
-    #   • Flight path:  pos0=[0,0,50] → rfd=[150,0,50]  (straight along x-axis at y=0,z=50)
-    #   • Obstacle centre offset in y: ±7 m  (obstacles stagger left/right)
-    #   • Radius: 4 m  →  surface at |y|=3 m  →  3 m clear corridor either side of path
-    #   • margin=6: influence zone extends 6 m from surface, reaching y=|3−6|=−3 m
-    #                (i.e. the influence zone just crosses the path at y=0)
-    #   • At closest approach (drone at y=0 passing x=xobs):
-    #       dist_to_surface = 3 m < margin=6  →  in zone
-    #       penetration = 1/3 − 1/6 = 0.167
-    #       force = k_rep × 0.167² ≈ 30 × 0.028 ≈ 0.83 m/s²  (pure lateral, y-axis)
-    #   • This lateral push creates a gentle slalom without blocking x-progress.
+    # Obstacle layout:
+    #   Path: pos0=[0,0,50] → rfd=[150,0,50] — straight along x-axis at y=0, z=50
+    #   Obs A: centre=[40, 5,50] radius=3 — surface at y=2 (2 m right of path)
+    #   Obs B: centre=[80,-5,50] radius=3 — surface at y=-2 (2 m left  of path)
+    #   Obs C: centre=[120, 5,50] radius=3 — surface at y=2 (2 m right of path)
+    #
+    # At closest approach (drone at y=0 beside each obstacle):
+    #   dist = 5 m from centre, D = 5-3 = 2 m = D_keep
+    #   => Drone is on the boundary of the hard-avoidance zone.
+    #   Vortex model beta_tan = [±0.707, −0.707, 0] (tangent to sphere)
+    #   => Force has both forward and lateral component — produces slalom.
+    #
+    # vel0 y-component breaks Se=0 degeneracy (see comment in code).
     3: {
         "name": "FS3 — Urban Obstacle Course",
         "pos0": np.array([0.0,   0.0, 50.0]),
-        # vel0 MUST NOT be perfectly aligned with (rfd - pos0) = [150,0,0].
-        # A perfectly aligned vel0=[5,0,0] makes heading error Se=0 → all
-        # SMC alpha-coefficients=0 → SLSQP equality degenerates to 0=0 →
-        # cmd=[0,0,0] → free fall.  The y-component breaks this degeneracy.
+        # A non-zero y-component prevents the heading-error Se from collapsing to
+        # zero at step 1 (vel0 aligned with rfd-pos0 => Se=0 => all SMC alphas=0
+        # => SLSQP returns cmd=[0,0,0] => free fall).
         "vel0": np.array([5.0,   0.5,  0.0]),
         "rfd":  np.array([150.0, 0.0, 50.0]),
         "tf":   90.0,
         "obstacles": [
-            make_obstacle([ 20.0,  7.0, 50.0], 15.0),   # right side  → pushes drone left
-            make_obstacle([ 80.0, -7.0, 50.0], 5.0),   # left  side  → pushes drone right
-            make_obstacle([120.0,  7.0, 50.0], 8.0),   # right side  → pushes drone left
+            make_obstacle([ 40.0,  5.0, 50.0], 3.0),  # right of path → pushes drone left
+            make_obstacle([ 80.0, -5.0, 50.0], 3.0),  # left  of path → pushes drone right
+            make_obstacle([120.0,  5.0, 50.0], 3.0),  # right of path → pushes drone left
         ],
-        "obstacle_margin": 0.5,
-        "obstacle_k_rep":  1,
+        "obstacle_D_start": 8.0,   # influence zone: 8 m from surface
+        "obstacle_D_keep":  2.0,   # maintain 2 m clearance from surface
+        "obstacle_k_rep":  50.0,   # vortex force gain
     },
 
     # FS4: Climb to 200 m — ISA density drops ~2.5 % — tractable for SMC
