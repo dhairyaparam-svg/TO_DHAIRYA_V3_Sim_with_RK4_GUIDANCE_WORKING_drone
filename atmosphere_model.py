@@ -268,14 +268,11 @@ def obstacle_vortex_guidance(pos, vel, target_pos, obstacles,
         # ------------------------------------------------------------------
         # Force magnitude
         # ------------------------------------------------------------------
-        if D >= D_keep:
-            # Soft zone: quadratic APF-style penalty from D_start inward
-            pen   = 1.0 / max(D, 0.05) - 1.0 / D_start
-            a_obs = k_rep * (pen ** 2) * guidance_dir
-        else:
-            # Hard zone: strong radial repulsion + tangential slide
-            pen   = 1.0 / max(D, 0.05) - 1.0 / D_keep
-            a_obs = k_rep * (pen ** 2) * (n_hat + beta_tan)
+        
+        # Soft zone: quadratic APF-style penalty from D_start inward
+        pen   = 1.0 / max(D, 0.05) - 1.0 / D_start
+        a_obs = k_rep * (pen ** 2) * guidance_dir
+        
 
         # ------------------------------------------------------------------
         # Distance-squared weighting; zero if drone is already moving away
