@@ -320,7 +320,7 @@ def build_constraints(t, states, params):
         {"type": "ineq", "fun": ineq_vel_zL},
         {"type": "ineq", "fun": ineq_vel_zU},
         {"type": "ineq", "fun": ineq_thrust},
-        #{"type": "ineq", "fun": ineq_ground_avoidance},
+        {"type": "ineq", "fun": ineq_ground_avoidance},
     ]
     return constraints
 
@@ -399,7 +399,7 @@ def guidance(t, states, params):
     # Add obstacle avoidance on top of SLSQP result
     a_obs = obstacle_acceleration(r, v, params)
     g = environment_acceleration(r, v, t, params)
-    cmd = g * np.array([0., 0., 1.]) + cmd + a_obs * np.array([1., 1., 0.])
+    cmd = g + cmd + a_obs 
 
     # Clamp to thrust limit
     m = states[6]
