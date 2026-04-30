@@ -357,7 +357,7 @@ def terminal_guidance(states, params):
     a_cmd = Kp * pos_err + Kd * vel_err - g_vec   # compensate gravity
 
     # Add obstacle avoidance
-    a_cmd = obstacle_acceleration(r, v, params)
+    a_cmd += obstacle_acceleration(r, v, params)
 
     # Clamp to thrust limit
     a_max = params["Tmax"] / m
