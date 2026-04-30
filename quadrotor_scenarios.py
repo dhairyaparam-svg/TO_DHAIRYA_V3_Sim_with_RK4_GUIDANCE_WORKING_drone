@@ -128,7 +128,7 @@ FLIGHT_SCENARIOS = {
         "tf":   90.0,
         "obstacles": [
             make_obstacle([ 40.0,  5.0, 50.0], 3.0),  # right of path → pushes drone left
-            make_obstacle([ 80.0, -5.0, 50.0], 11.0),  # left  of path → pushes drone right
+            make_obstacle([ 80.0, -5.0, 50.0], 3.0),  # left  of path → pushes drone right
             make_obstacle([120.0,  5.0, 50.0], 4.0),  # right of path → pushes drone left
         ],
         "obstacle_D_start": 8.0,   # influence zone: 8 m from surface
