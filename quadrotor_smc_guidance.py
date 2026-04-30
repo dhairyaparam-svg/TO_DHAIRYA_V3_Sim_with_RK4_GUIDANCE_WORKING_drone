@@ -399,7 +399,7 @@ def guidance(t, states, params):
     # Add obstacle avoidance on top of SLSQP result
     a_obs = obstacle_acceleration(r, v, params)
     g = environment_acceleration(r, v, t, params)
-    cmd = g + cmd + a_obs
+    cmd = g * np.array([0., 0., 1.]) + cmd + a_obs * np.array([1., 1., 0.])
 
     # Clamp to thrust limit
     m = states[6]
