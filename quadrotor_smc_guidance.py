@@ -71,12 +71,16 @@ def obstacle_acceleration(pos, vel, params):
     D_start = params.get("obstacle_D_start",
                 params.get("obstacle_margin", 8.0))
     D_keep  = params.get("obstacle_D_keep", D_start * 0.3)
+    # Cap obstacle force to 60 % of thrust budget so gravity compensation survives
+    a_max     = params.get("Tmax", 60.0) / params.get("m0", 3.5)
+    max_force = a_max * 0.6
     return obstacle_vortex_guidance(
         pos, vel, params["rfd"],
         params["obstacles"],
         D_start=D_start,
         D_keep=D_keep,
         k_rep=params.get("obstacle_k_rep", 50.0),
+        max_force=max_force,
     )
 
 
@@ -359,8 +363,18 @@ def terminal_guidance(states, params):
     # Add obstacle avoidance
     a_cmd += obstacle_acceleration(r, v, params)
 
-    # Clamp to thrust limit
-    a_max = params["Tmax"] / m
+    # Priority clamp: preserve gravity compensation (z-axis) before scaling xy.
+    # Without this, a large lateral obstacle force would squeeze the z-component
+    # after clamping to a_max, causing the drone to fall.
+    a_max  = params["Tmax"] / m
+    g_comp = -g_vec[2]                     # = 9.81 m/s²
+    if a_cmd[2] < g_comp:
+        # Fit xy within remaining thrust after reserving g_comp for z
+        remaining = np.sqrt(max(a_max**2 - g_comp**2, 0.0))
+        xy_norm   = np.linalg.norm(a_cmd[0:2])
+        if xy_norm > remaining:
+            a_cmd[0:2] *= remaining / xy_norm
+        a_cmd[2] = g_comp
     a_norm = np.linalg.norm(a_cmd)
     if a_norm > a_max:
         a_cmd = a_cmd * (a_max / a_norm)
@@ -400,9 +414,19 @@ def guidance(t, states, params):
     a_obs = obstacle_acceleration(r, v, params)
     cmd = cmd + a_obs
 
-    # Clamp to thrust limit
-    m = states[6]
-    a_max = params["Tmax"] / m
+    # Priority clamp: preserve gravity compensation before scaling xy.
+    # A large lateral obstacle force would otherwise shrink the z-component
+    # proportionally after clamping, causing the drone to fall.
+    m      = states[6]
+    g_vec  = params["g_vec"]
+    a_max  = params["Tmax"] / m
+    g_comp = -g_vec[2]                     # = 9.81 m/s²
+    if cmd[2] < g_comp:
+        remaining = np.sqrt(max(a_max**2 - g_comp**2, 0.0))
+        xy_norm   = np.linalg.norm(cmd[0:2])
+        if xy_norm > remaining:
+            cmd[0:2] *= remaining / xy_norm
+        cmd[2] = g_comp
     a_norm = np.linalg.norm(cmd)
     if a_norm > a_max:
         cmd = cmd * (a_max / a_norm)
@@ -423,7 +447,10 @@ def state_equations_rk4(states, command, t, params):
     m = states[6]
 
     g = environment_acceleration(r, v, t, params)
-    a_obs = obstacle_acceleration(r, v, params)
+    # NOTE: obstacle avoidance is a navigation command already baked into
+    # `command` by guidance().  It is NOT a separate physical field force,
+    # so it must NOT be added here again (would double-count the force and
+    # overwhelm the thrust budget).
 
     a_total = np.linalg.norm(command)
     thrust  = m * a_total
@@ -431,7 +458,7 @@ def state_equations_rk4(states, command, t, params):
 
     dstate = np.zeros(7)
     dstate[0:3] = v
-    dstate[3:6] = g + a_obs + command
+    dstate[3:6] = g + command
     dstate[6]   = -mdot
     return dstate
 

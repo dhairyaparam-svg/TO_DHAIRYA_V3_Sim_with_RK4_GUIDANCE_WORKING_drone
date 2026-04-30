@@ -154,7 +154,8 @@ def make_obstacle(centre, radius):
 
 
 def obstacle_vortex_guidance(pos, vel, target_pos, obstacles,
-                             D_start=8.0, D_keep=2.0, k_rep=50.0):
+                             D_start=8.0, D_keep=2.0, k_rep=50.0,
+                             max_force=None):
     """
     3-D vortex obstacle-guidance model  (Wang & Xiang, CAC 2022 — adapted).
 
@@ -288,7 +289,21 @@ def obstacle_vortex_guidance(pos, vel, target_pos, obstacles,
 
         total_force += W * a_obs
 
+    # Hard cap: obstacle force must never exceed max_force so that it cannot
+    # consume the entire thrust budget and starve gravity compensation.
+    if max_force is not None:
+        f_norm = np.linalg.norm(total_force)
+        if f_norm > max_force:
+            total_force = total_force * (max_force / f_norm)
+
     return total_force
+
+def obstacle_penalty(pos, obstacles, margin=2.0, k_rep=50.0):
+    """Legacy alias — redirects to the vortex model with APF-compatible signature."""
+    return obstacle_vortex_guidance(
+        pos, np.zeros(3), pos + np.array([1., 0., 0.]),
+        obstacles, D_start=margin, D_keep=margin * 0.25, k_rep=k_rep,
+    )
 
 
 def check_obstacle_violation(pos, obstacles):
