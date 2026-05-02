@@ -797,7 +797,7 @@ st.divider()
 st.markdown("""
 ---
 **SMC-IO based Multirotor Guidance System**
-*Based on research by D. Dosi & Venketesh (2026)*
+*Based on research by Shincy & Ghosh (2022)*
 
 Built with: Passion | Creativity | Love | 
 
